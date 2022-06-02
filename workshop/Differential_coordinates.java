@@ -100,16 +100,18 @@ public class Differential_coordinates extends PjWorkshop {
         for(int triangle_index = 0; triangle_index < triangles.length; triangle_index++) {
             PiVector triangle = triangles[triangle_index];
 
+//            int[] global_indeces = triangle.getEntries();
+
             PdMatrix gradient = calcGradient(new PdVector[]{
                     m_geom.getVertex(triangle.getEntry(0)),
                     m_geom.getVertex(triangle.getEntry(1)),
                     m_geom.getVertex(triangle.getEntry(2))});
 
             // add the gradient to the sparse matrix G
-            for(int column_idx = 0; column_idx < 3; column_idx++) {
-                matrix_G.addEntry((3 * triangle_index) + column_idx, triangle.getEntry(0), gradient.getEntry(column_idx, 0));
-                matrix_G.addEntry((3 * triangle_index)+ column_idx, triangle.getEntry(1), gradient.getEntry(column_idx, 1));
-                matrix_G.addEntry((3 * triangle_index) +column_idx, triangle.getEntry(2), gradient.getEntry(column_idx, 2));
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    matrix_G.addEntry((3 * triangle_index) + j, triangle.getEntry(i), gradient.getEntry(j, i));
+                }
             }
         }
         return matrix_G;
@@ -121,7 +123,6 @@ public class Differential_coordinates extends PjWorkshop {
      */
     public PnSparseMatrix calcCotangentMatrix(PnSparseMatrix matrixG, PnSparseMatrix matrixM){
         // initialize the Cotangent matrix S
-        int n = m_geom.getNumVertices();
         // calculate the G transposed as it is in the slides.
         PnSparseMatrix MatrixGTranspose = PnSparseMatrix.transposeNew(matrixG);
         // calculate according to formula from lectures: S = G^{T} * M_{V} * G
@@ -132,10 +133,14 @@ public class Differential_coordinates extends PjWorkshop {
 
     public void calcLaplaceSelected() {
         PnSparseMatrix matrixG = calcLinearPolGradients();
+        System.out.println("Matrix G:");
+        System.out.println(matrixG.toString());
 
         PnSparseMatrix matrixM = getMatrixM();
 
         PnSparseMatrix cotangent_matrix_S = calcCotangentMatrix(matrixG, matrixM);
+        System.out.println("Matrix S:");
+        System.out.println(cotangent_matrix_S.toString());
 
 //        PnSparseMatrix Laplace_matrix_L =
 
